@@ -1,13 +1,21 @@
-FROM ubuntu:20.04
+FROM ubuntu:latest
 
-RUN apt-get update && apt-get install -y \
-    python3.10 \
+# stop tzdata from asking questions during apt install
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
     python3-pip \
-    git
+    python3-yaml \ 
+    git \
+    tzdata \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install PyYAML
-
-COPY feed.py /usr/bin/feed.py
+# your app files
+COPY feed.py /usr/local/bin/feed.py
 COPY entrypoint.sh /entrypoint.sh
+
+# make scripts executable
+RUN chmod +x /usr/local/bin/feed.py /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
